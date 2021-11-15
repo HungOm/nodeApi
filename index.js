@@ -2,13 +2,52 @@
 
 //dependencies
 const http = require("http");
+const https = require('https');
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
+const fs = require('fs');
 
 const config = require('./config');
 
-const server = http.createServer(function (req, res) {
-  //get the url and parse it
+// instantiate the http server 
+const httpServer = http.createServer(function (req, res) {
+    unifiedServer(req,res)
+
+});
+
+
+// start the httphttpS
+httpServer.listen(config.httpPort, function () {
+    console.log(`This server is  listening on port ${config.httpPort} now`);
+  });
+
+
+
+// instantiate the https server 
+var httpsServerOptions = {
+
+    'key' :fs.readFileSync('./https/key.pem'),
+    'cert':fs.readFileSync('./https/cert.pem')
+
+};
+const httpsServer = https.createServer(httpsServerOptions,function (req, res) {
+    unifiedServer(req,res)
+
+});
+
+
+
+// start the httpshttpS
+httpsServer.listen(config.httpsPort,function(){
+    console.log(`This server is  listening on port ${config.httpsPort} now`);
+})
+
+
+
+// server for both http and https 
+var unifiedServer = function(req,res){
+
+      //get the url and parse it
   var parsedUrl = url.parse(req.url, true);
 
   //get the path
@@ -83,13 +122,9 @@ const server = http.createServer(function (req, res) {
       );
     });
   });
-});
 
 
-// start the server 
-server.listen(config.port, function () {
-  console.log(`This server is listening on port ${config.port} in ${config.envName} now`);
-});
+}
 
 //define handler
 var handlers = {};
