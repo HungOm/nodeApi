@@ -129,10 +129,15 @@ var unifiedServer = function(req,res){
 //define handler
 var handlers = {};
 
-handlers.sample = function (data, callback) {
-  //call http status code , and a payload object
-  callback(406, { name: "sample handlers" });
-};
+// handlers.sample = function (data, callback) {
+//   //call http status code , and a payload object
+//   callback(406, { name: "sample handlers" });
+// };
+//ping handler
+
+handlers.ping =function(data,callback){
+  callback(200)
+}
 
 //not founder handlers
 handlers.notFound = function (data, callback) {
@@ -141,5 +146,5 @@ handlers.notFound = function (data, callback) {
 
 // define router
 var router = {
-  sample: handlers.sample,
+  'ping': handlers.ping,
 };
