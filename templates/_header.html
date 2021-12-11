@@ -10,7 +10,7 @@
       <link type="image/x-icon" href="favicon.ico">
 
       <script type="text/javascript" charset="utf-8" src='public/app.js'> </script>
-        <link rel="stylesheet" href="public/app.css">
+    <link rel="stylesheet" href="public/app.css">
   </head>
 
   <body class="body.class">
@@ -23,28 +23,30 @@
         <div class="header">
 
             <!-- logo  -->
-            <a href="/" class="logo"></a>
+            <a href="/" class="logo">
+                <img src="/public/logo.png" alt="" class="logo">
+            </a>
 
             <!-- Navigation  -->
             <ul class="menu">
                 <li>
-                    <a href="">Home</a>
+                    <a href="/">Home</a>
                 </li>
 
                 <li>
-                    <a   class="loggedOut" href="">Signup</a>
+                    <a   class="loggedOut" href="/account/create">Signup</a>
                 </li>
 
                 <li>
-                    <a class="loggedIn" href="">Login</a>
+                    <a class="loggedOut" href="/session/create">Login</a>
                 </li>
 
                 <li>
-                    <a href="">Dashboard</a>
+                    <a class="loggedIn" href="/checks/all">Dashboard</a>
                 </li>
 
                 <li>
-                    <a href="">Account Settings</a>
+                    <a  class="loggedIn"href="/account/edit">Account Settings</a>
                 </li>
 
                 <li>
