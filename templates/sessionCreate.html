@@ -1,0 +1,19 @@
+<h1>Login to your account</h1>
+<h2>Please enter your phone number and password to access your account.</h2>
+
+<div class="formWrapper">
+  <form id="accountCreate" action="/api/tokens" method="POST">
+    <div class="formError"></div>
+    <div class="inputWrapper">
+      <div class="inputLabel">Phone Number</div>
+      <input type="text" name="phone" autocomplete="phone" placeholder="(415) 123-4567" />
+    </div>
+    <div class="inputWrapper">
+      <div class="inputLabel">Enter Your Password</div>
+      <input type="password" autocomplete="current-password" name="password" placeholder="Make it a good one!" />
+    </div>
+    <div class="inputWrapper ctaWrapper">
+      <button type="submit" class="cta blue">Login</button>
+    </div>
+  </form>
+</div>

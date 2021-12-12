@@ -119,7 +119,7 @@ body.index .blurb{
   text-align: center;
   background-color: #ececec;
   border-color: #b3b3b3;
-  border-style: dotted;
+  /* border-style: dotted; */
   border-width: 1px;
   border-radius: 10px;
   padding: 20px;
@@ -127,6 +127,7 @@ body.index .blurb{
   max-width: 500px;
   line-height: 150%;
   font-size: 14px;
+
 }
 
 .ctaWrapper{
