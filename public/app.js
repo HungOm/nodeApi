@@ -5,7 +5,7 @@
  * 
  */
 const app = {};
-console.log("Hello world")
+console.log("App initilzed")
 //config 
 app.config = {
     'sessionToken': false
@@ -15,7 +15,6 @@ app.client = {};
 //Interface for making api call
 app.client.request = function (headers, path, method, queryStringObject, payload, callback) {
     //set defaults
-    // console.log(queryStringObject.hasOwnPorperty['phone'])
     headers = typeof (headers) == 'object' && headers !== null ? headers : {};
     path = typeof (path) == 'string' ? path : '/';
     method = typeof (method) == 'string' && ['POST', 'GET', 'PUT', 'DELETE'].indexOf(method) > -1 ? method.toUpperCase() : 'GET';
@@ -28,7 +27,6 @@ app.client.request = function (headers, path, method, queryStringObject, payload
 
 
     for (let queryKey in queryStringObject) {
-        console.log(queryKey)
         if (queryStringObject.hasOwnProperty(queryKey)) {
             counter++;
             //IF at least one query sring parameter has already been added prepend new ones with an ampersand
@@ -65,11 +63,9 @@ app.client.request = function (headers, path, method, queryStringObject, payload
     }
 
     // catch the status code from promise 
-    console.log(myHeaders.get('token'));
     let statusCode = ''
     fetch(requestUrl, requestOptions)
         .then(response => {
-            console.log(response)
             statusCode = response.status
             return response.json()
         })
@@ -203,8 +199,6 @@ app.loadDataOnPage = function () {
 
     //Get the current page from the body class
     let bodyClasses = document.querySelector('body').classList;
-
-    console.log(bodyClasses[0])
     let primaryClass = typeof (bodyClasses[0]) == 'string' ? bodyClasses[0] : false;
 
     if (primaryClass == 'accountEdit') {
@@ -228,8 +222,6 @@ app.loadAccountEditPage = function () {
 
 
         app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, function (statusCode, responsePayload) {
-            console.log("Hello")
-
             if (statusCode == 200) {
                 // Put the data into the forms as values where needed
                 document.querySelector("#accountEdit1 .firstNameInput").value = responsePayload.firstName;
@@ -306,7 +298,7 @@ app.renewToken = function (callback) {
             if (statusCode == 200) {
                 // Get the new token details
                 var queryStringObject = {
-                    'id': currentToken.token
+                    'token': currentToken.token
                 };
                 app.client.request(undefined, 'api/tokens', 'GET', queryStringObject, undefined, function (statusCode, responsePayload) {
                     // Display an error on the form if needed
