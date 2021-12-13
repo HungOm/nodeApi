@@ -15,6 +15,7 @@ app.client = {};
 //Interface for making api call
 app.client.request = function (headers, path, method, queryStringObject, payload, callback) {
     //set defaults
+    // console.log(queryStringObject.hasOwnPorperty['phone'])
     headers = typeof (headers) == 'object' && headers !== null ? headers : {};
     path = typeof (path) == 'string' ? path : '/';
     method = typeof (method) == 'string' && ['POST', 'GET', 'PUT', 'DELETE'].indexOf(method) > -1 ? method.toUpperCase() : 'GET';
@@ -24,42 +25,51 @@ app.client.request = function (headers, path, method, queryStringObject, payload
     //For each query string parameter sent, add it to the path
     let requestUrl = path + '?';
     let counter = 0;
-    // debugger
-    if (method !== 'DELETE') {
-        for (let queryKey in queryStringObject) {
-            if (queryStringObject.hasOwnPorpety(queryKey)) {
-                counter++;
-                //IF at least one query sring parameter has already been added prepend new ones with an ampersand
-                if (counter > 1) {
-                    requestUrl += '&';
-                }
-                //Add the key and value 
-                requestUrl += queryKey + '=' + queryStringObject[queryKey];
+
+
+    for (let queryKey in queryStringObject) {
+        console.log(queryKey)
+        if (queryStringObject.hasOwnProperty(queryKey)) {
+            counter++;
+            //IF at least one query sring parameter has already been added prepend new ones with an ampersand
+            if (counter > 1) {
+                requestUrl += '&';
             }
+            //Add the key and value 
+            requestUrl += queryKey + '=' + queryStringObject[queryKey];
         }
     }
+
     // create new header object 
-    let setHeaders = new Headers(headers)
-    setHeaders.append(
-        'Content-Type', 'application/json'
-    )
+    let myHeaders = new Headers({
+        'Content-Type': 'application/json'
+    });
+    // For each header sent, add it to the request
+    for (var headerKey in headers) {
+        if (headers.hasOwnProperty(headerKey)) {
+            myHeaders.set(headerKey, headers[headerKey]);
+        }
+    }
+
     if (app.config.sessionToken) {
-        setHeaders.append('token', app.config.sessionToken.token);
+        myHeaders.append('token', app.config.sessionToken.token);
     }
     //create new request options to pass to fetch request
     let requestOptions = {
         method: method,
-        headers: setHeaders,
+        headers: myHeaders,
     };
     // send payload in string format if it post/put/or delete request 
     if (method !== 'GET') {
         requestOptions.body = JSON.stringify(payload);
     }
-    console.log(queryStringObject + "- *****")
+
     // catch the status code from promise 
+    console.log(myHeaders.get('token'));
     let statusCode = ''
     fetch(requestUrl, requestOptions)
         .then(response => {
+            console.log(response)
             statusCode = response.status
             return response.json()
         })
@@ -95,49 +105,60 @@ app.logUserOut = function () {
 // Bind the forms
 app.bindForms = function () {
     if (document.querySelector("form")) {
-        document.querySelector("form").addEventListener("submit", function (e) {
-            // Stop it from submitting
-            e.preventDefault();
-            var formId = this.id;
-            var path = this.action;
-            var method = this.method.toUpperCase();
-            // Hide the error message (if it's currently shown due to a previous error)
-            document.querySelector("#" + formId + " .formError").style.display = 'hidden';
-            // Turn the inputs into a payload
-            var payload = {};
-            var elements = this.elements;
-            for (var i = 0; i < elements.length; i++) {
-                if (elements[i].type !== 'submit') {
-                    var valueOfElement = elements[i].type == 'checkbox' ? elements[i].checked : elements[i].value;
-                    // make +0123455909 to 0123455909  
-                    if (elements[i].name == 'phone') {
-                        payload[elements[i].name] = valueOfElement.replace(/\D/g, "")
-                    } else {
-                        payload[elements[i].name] = valueOfElement;
+
+        const allForms = document.querySelectorAll("form");
+
+        for (let i = 0; i < allForms.length; i++) {
+            allForms[i].addEventListener("submit", function (e) {
+                // Stop it from submitting
+                e.preventDefault();
+                var formId = this.id;
+                var path = this.action;
+
+                var method = this.method.toUpperCase();
+                if (this._method !== undefined) {
+                    method = this._method.value
+                }
+                // Hide the error message (if it's currently shown due to a previous error)
+                document.querySelector("#" + formId + " .formError").style.display = 'hidden';
+                // Turn the inputs into a payload
+                var payload = {};
+
+                var elements = this.elements;
+                for (var i = 0; i < elements.length; i++) {
+                    if (elements[i].type !== 'submit') {
+                        var valueOfElement = elements[i].type == 'checkbox' ? elements[i].checked : elements[i].value;
+                        // make +0123455909 to 0123455909  
+                        if (elements[i].name == 'phone') {
+                            payload[elements[i].name] = valueOfElement.replace(/\D/g, "")
+                        } else {
+                            payload[elements[i].name] = valueOfElement;
+                        }
                     }
                 }
-            }
-            // Call the API
-            app.client.request(undefined, path, method, undefined, payload, function (statusCode, responsePayload) {
-                // Display an error on the form if needed
-                if (statusCode !== 200) {
-                    if (statusCode == 403) {
-                        // log the user out
-                        app.logUserOut();
+
+                // Call the API
+                app.client.request(undefined, path, method, undefined, payload, function (statusCode, responsePayload) {
+                    // Display an error on the form if needed
+                    if (statusCode !== 200) {
+                        if (statusCode == 403) {
+                            // log the user out
+                            app.logUserOut();
+                        } else {
+                            // Try to get the error from the api, or set a default error message
+                            var error = typeof (responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
+                            // Set the formError field with the error text
+                            document.querySelector("#" + formId + " .formError").innerHTML = error;
+                            // Show (unhide) the form error field on the form
+                            document.querySelector("#" + formId + " .formError").style.display = 'block';
+                        }
                     } else {
-                        // Try to get the error from the api, or set a default error message
-                        var error = typeof (responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
-                        // Set the formError field with the error text
-                        document.querySelector("#" + formId + " .formError").innerHTML = error;
-                        // Show (unhide) the form error field on the form
-                        document.querySelector("#" + formId + " .formError").style.display = 'block';
+                        // If successful, send to form response processor
+                        app.formResponseProcessor(formId, payload, responsePayload);
                     }
-                } else {
-                    // If successful, send to form response processor
-                    app.formResponseProcessor(formId, payload, responsePayload);
-                }
+                });
             });
-        });
+        }
     }
 };
 // Form response processor
@@ -169,11 +190,73 @@ app.formResponseProcessor = function (formId, requestPayload, responsePayload) {
         app.setSessionToken(responsePayload);
         window.location = '/checks/all';
     }
+
+    // If forms saved successfully and they have success messages, show them
+    var formsWithSuccessMessages = ['accountEdit1', 'accountEdit2'];
+    if (formsWithSuccessMessages.indexOf(formId) > -1) {
+        document.querySelector("#" + formId + " .formSuccess").style.display = 'block';
+    }
 };
+
+//Load data on the page
+app.loadDataOnPage = function () {
+
+    //Get the current page from the body class
+    let bodyClasses = document.querySelector('body').classList;
+
+    console.log(bodyClasses[0])
+    let primaryClass = typeof (bodyClasses[0]) == 'string' ? bodyClasses[0] : false;
+
+    if (primaryClass == 'accountEdit') {
+        app.loadAccountEditPage();
+    }
+}
+
+//Load account edit page
+
+// Load the account edit page specifically
+app.loadAccountEditPage = function () {
+
+    // Get the phone number from the current token, or log the user out if none is there
+    var phone = typeof (app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+
+    if (phone) {
+        // Fetch the user data
+        var queryStringObject = {
+            'phone': phone
+        };
+
+
+        app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, function (statusCode, responsePayload) {
+            console.log("Hello")
+
+            if (statusCode == 200) {
+                // Put the data into the forms as values where needed
+                document.querySelector("#accountEdit1 .firstNameInput").value = responsePayload.firstName;
+                document.querySelector("#accountEdit1 .lastNameInput").value = responsePayload.lastName;
+                document.querySelector("#accountEdit1 .displayPhoneInput").value = responsePayload.phone;
+
+                // Put the hidden phone field into both forms
+                var hiddenPhoneInputs = document.querySelectorAll("input.hiddenPhoneNumberInput");
+                for (var i = 0; i < hiddenPhoneInputs.length; i++) {
+                    hiddenPhoneInputs[i].value = responsePayload.phone;
+                }
+
+            } else {
+                // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+                //   app.logUserOut();
+            }
+        });
+    } else {
+        app.logUserOut();
+    }
+
+
+};
+
 // Get the session token from localstorage and set it in the app.config object
 app.getSessionToken = function () {
     var tokenString = localStorage.getItem('token');
-    console.log(tokenString)
     if (typeof (tokenString) == 'string') {
         try {
             var token = JSON.parse(tokenString);
@@ -192,7 +275,6 @@ app.getSessionToken = function () {
 // Set (or remove) the loggedIn class from the body
 app.setLoggedInClass = function (add) {
     var target = document.querySelector("body");
-    console.log(target.classList)
     if (add) {
         target.classList.add('loggedIn');
     } else {
@@ -201,7 +283,6 @@ app.setLoggedInClass = function (add) {
 };
 // Set the session token in the app.config object as well as localstorage
 app.setSessionToken = function (token) {
-    console.log(token)
     app.config.sessionToken = token;
     var tokenString = JSON.stringify(token);
     localStorage.setItem('token', tokenString);
@@ -267,6 +348,7 @@ app.init = function () {
     app.getSessionToken();
     // Renew token
     app.tokenRenewalLoop();
+    app.loadDataOnPage()
 };
 // Call the init processes after the window loads
 window.onload = function () {
