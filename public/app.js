@@ -140,6 +140,9 @@ app.bindForms = function () {
                                 if (nameOfElement == 'httpmethod') {
                                     nameOfElement = 'method';
                                 }
+                                if (nameOfElement == 'uid') {
+                                    nameOfElement = 'id';
+                                }
                                 // If the element has the class "multiselect" add its value(s) as array elements
                                 if (classOfElement.indexOf('multiselect') > -1) {
                                     if (elementIsChecked) {
@@ -209,7 +212,7 @@ app.formResponseProcessor = function (formId, requestPayload, responsePayload) {
         window.location = '/checks/all';
     }
     // If forms saved successfully and they have success messages, show them
-    var formsWithSuccessMessages = ['accountEdit1', 'accountEdit2'];
+    var formsWithSuccessMessages = ['accountEdit1', 'accountEdit2', 'checksEdit1'];
     if (formsWithSuccessMessages.indexOf(formId) > -1) {
         document.querySelector("#" + formId + " .formSuccess").style.display = 'block';
     }
@@ -220,6 +223,10 @@ app.formResponseProcessor = function (formId, requestPayload, responsePayload) {
     }
     //   if the user create checks succcessfully , redirect back to checkboard 
     if (formId == 'checksCreate') {
+        window.location = '/checks/all';
+    }
+    //if checks deleted , redirect to dashboard
+    if (formId == 'checksEdit2') {
         window.location = '/checks/all';
     }
 };
@@ -234,6 +241,9 @@ app.loadDataOnPage = function () {
     // Logic for dashboard page
     if (primaryClass == 'checkDashboard') {
         app.loadChecksListPage();
+    }
+    if (primaryClass == 'checksEdit') {
+        app.loadCheckEditPage()
     }
 }
 //Load account edit page
@@ -405,13 +415,47 @@ app.loadChecksListPage = function () {
                 }
             } else {
                 // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
-                //   app.logUserOut();
+                app.logUserOut();
             }
         });
     } else {
         app.logUserOut();
     }
 };
+// get the checks edit page
+app.loadCheckEditPage = function () {
+    let id = typeof (window.location.href.split('=')[1]) == 'string' && window.location.href.split('=')[1].length > 0 ? window.location.href.split('=')[1] : false;
+    if (id) {
+        let queryStringObject = {
+            'id': id
+        };
+        app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, function (statusCode, responsePayload) {
+            if (statusCode == 200) {
+                let hiddenIdInputs = document.querySelectorAll('input.hiddenIdInput');
+                for (let i = 0; i < hiddenIdInputs.length; i++) {
+                    hiddenIdInputs[i].value = responsePayload.id;
+                }
+                document.querySelector("#checksEdit1 .displayIdInput").value = responsePayload.id;
+                document.querySelector("#checksEdit1 .displayStateInput").value = responsePayload.state;
+                document.querySelector("#checksEdit1 .protocolInput").value = responsePayload.protocol;
+                document.querySelector("#checksEdit1 .urlInput").value = responsePayload.url;
+                document.querySelector("#checksEdit1 .methodInput").value = responsePayload.method;
+                document.querySelector("#checksEdit1 .timeoutInput").value = responsePayload.timeoutSeconds;
+                let successCodeCheckboxes = document.querySelectorAll("#checksEdit1 input.successCodesInput");
+                for (var i = 0; i < successCodeCheckboxes.length; i++) {
+                    if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
+                        successCodeCheckboxes[i].checked = true;
+                    }
+                }
+                debugger
+            } else {
+                window.location = '/checks/all';
+            }
+        })
+    } else {
+        window.location = '/checks/all';
+    }
+}
 // Init (bootstrapping)
 app.init = function () {
     // Bind all form submissions
