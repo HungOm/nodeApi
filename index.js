@@ -10,6 +10,7 @@
 
 const server = require('./lib/server');
 const workers = require('./lib/workers');
+const cli = require('./lib/cli');
 
 //Declare the app
 var app = {};
@@ -22,6 +23,11 @@ app.init = function(){
 
   //start the workers
   workers.init();
+
+  //command line after server starts
+  setTimeout(function(){
+    cli.init()
+  },50);
 };
 
 
