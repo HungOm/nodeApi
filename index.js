@@ -28,6 +28,7 @@ app.init = function(){
   setTimeout(function(){
     cli.init()
   },50);
+  
 };
 
 
