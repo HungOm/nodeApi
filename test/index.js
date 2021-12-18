@@ -1,35 +1,17 @@
 /**
  * Test runner
  */
-//Dependencies
-const helpers = require('./../lib/helpers') // ./ -> means back out of current folder
-const assert = require('assert');
-// const app = require('../index-strict-mode');
 
 //Application log for test runner\
 _app = {}; //global
 //Container for the tests
-_app.tests = {
-    'unit': {}
-}
-//Assert get a nubmer function is returnning a number
-_app.tests.unit['helpers.getANumber should return a number'] = function (done) {
-    let val = helpers.getANumber();
-    assert.equal(typeof val, 'number');
-    done();
-}
-//Assert get a nubmer function is returnning a number
-_app.tests.unit['helpers.getANumber should return 1'] = function (done) {
-    let val = helpers.getANumber();
-    assert.equal(val, 1);
-    done();
-}
-//Assert get a nubmer function is returnning a number
-_app.tests.unit['helpers.getANumber should return 2'] = function (done) {
-    let val = helpers.getANumber();
-    assert.equal(val, 2);
-    done();
-}
+_app.tests = {};
+
+
+//Add on the unit tests 
+_app.tests.unit = require('./unit');
+
+
 //Count all the test
 _app.countTest = function () {
     let counter = 0;
