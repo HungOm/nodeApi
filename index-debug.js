@@ -45,7 +45,6 @@ app.init = function(){
   //call the init script that wil throw
   exampleDebugginProblem.init()
 
-  debugger
   
 };
 

@@ -447,7 +447,6 @@ app.loadCheckEditPage = function () {
                         successCodeCheckboxes[i].checked = true;
                     }
                 }
-                debugger
             } else {
                 window.location = '/checks/all';
             }

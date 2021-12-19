@@ -20,7 +20,6 @@ var app = {};
 
 foo ='bar';
 
-debugger
 
 
 app.init = function(){
