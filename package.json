@@ -5,7 +5,10 @@
   "version": "1.0.0",
   "scripts":{
     "start": "node index.js",
-    "dev": "env $(cat .env | grep -v \"#\" | xargs) yarn start"
+    "cluster": "node index-cluster.js",
+    "dev": "env $(cat .env | grep -v \"#\" | xargs) yarn start",
+    "cluster-dev": "env $(cat .env | grep -v \"#\" | xargs) yarn cluster"
+
   }
   
 } 
